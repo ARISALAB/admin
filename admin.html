@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FinanceOS — License Key Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0b0f;--bg2:#0f1117;--bg3:#141720;
+  --surface:#161b27;--surface2:#1c2233;
+  --border:rgba(255,255,255,.07);--border-bright:rgba(255,255,255,.14);
+  --ink:#f0f2f8;--ink2:#a0a8c0;--ink3:#5a637a;
+  --accent:#00d4aa;--accent2:#00b8ff;
+  --accent-s:rgba(0,212,170,.1);
+  --danger:#ff4d6d;--warning:#f59e0b;
+  --success:#00d4aa;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'Fira Code',monospace;
+  --r:10px;--rl:14px;--rxl:20px;
+}
+html{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+
+/* Ambient */
+body::before{content:'';position:fixed;top:-200px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,212,170,.12) 0%,transparent 70%);pointer-events:none;border-radius:50%;filter:blur(80px)}
+body::after{content:'';position:fixed;bottom:-100px;left:-50px;width:400px;height:400px;background:radial-gradient(circle,rgba(0,184,255,.08) 0%,transparent 70%);pointer-events:none;border-radius:50%;filter:blur(80px)}
+
+/* Header */
+.header{background:rgba(10,11,15,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,212,170,.3)}
+.logo-mark svg{width:20px;height:20px;fill:white}
+.logo-name{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:var(--ink3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.header-badge{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--warning);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.3px}
+
+/* Layout */
+main{max-width:1100px;margin:0 auto;padding:36px 32px;flex:1;width:100%;position:relative;z-index:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);padding:28px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+.card-title{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.card-title svg{width:14px;height:14px;opacity:.6}
+
+/* Form */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+label{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
+input,select{padding:10px 13px;border:1px solid var(--border-bright);border-radius:var(--r);font-size:14px;font-family:var(--font);color:var(--ink);background:var(--bg3);outline:none;transition:border .15s,box-shadow .15s;width:100%}
+input:focus,select:focus{border-color:rgba(0,212,170,.5);box-shadow:0 0 0 3px rgba(0,212,170,.08)}
+select option{background:var(--surface2)}
+input.mono-input{font-family:var(--mono);letter-spacing:2px;font-size:15px;text-align:center}
+input.error{border-color:var(--danger);animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* Buttons */
+.btn{padding:10px 20px;border-radius:var(--r);border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--font);transition:all .15s;display:inline-flex;align-items:center;gap:7px;letter-spacing:-.1px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0b0f;box-shadow:0 4px 16px rgba(0,212,170,.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,212,170,.4)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--surface2);color:var(--ink2);border:1px solid var(--border-bright)}
+.btn-secondary:hover{background:rgba(255,255,255,.07);color:var(--ink)}
+.btn-danger{background:rgba(255,77,109,.12);color:var(--danger);border:1px solid rgba(255,77,109,.2)}
+.btn-danger:hover{background:rgba(255,77,109,.2)}
+.btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px}
+.btn-full{width:100%;justify-content:center}
+
+/* Key display */
+.key-result{background:var(--bg3);border:1px solid var(--border-bright);border-radius:var(--rl);padding:20px;margin-top:16px;display:none}
+.key-label{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.key-text{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--accent);letter-spacing:3px;word-break:break-all;margin-bottom:12px;line-height:1.4}
+.key-actions{display:flex;gap:8px;flex-wrap:wrap}
+.copy-confirm{font-size:12px;color:var(--success);margin-top:8px;display:none;font-weight:600}
+
+/* Verify result */
+.verify-result{margin-top:12px;display:none;padding:12px 16px;border-radius:var(--r);font-size:13px;font-weight:600;display:none}
+.verify-result.ok{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.25);color:var(--success)}
+.verify-result.err{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.25);color:var(--danger)}
+
+/* Keys table */
+.keys-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+.keys-table th{padding:9px 14px;background:var(--bg3);text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3);border-bottom:1px solid var(--border)}
+.keys-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.keys-table tr:last-child td{border-bottom:none}
+.keys-table tr:hover td{background:rgba(255,255,255,.02)}
+.key-mono{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:1px}
+.biz-name-cell{font-weight:600;color:var(--ink)}
+.date-cell{font-size:11.5px;color:var(--ink3)}
+.type-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.3px}
+.type-REST{background:rgba(0,212,170,.1);color:var(--accent);border:1px solid rgba(0,212,170,.2)}
+.type-CAF{background:rgba(0,184,255,.1);color:var(--accent2);border:1px solid rgba(0,184,255,.2)}
+.type-HOT{background:rgba(245,158,11,.1);color:var(--warning);border:1px solid rgba(245,158,11,.2)}
+.type-FOS{background:rgba(160,168,192,.1);color:var(--ink2);border:1px solid var(--border-bright)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink3)}
+.empty-state svg{width:40px;height:40px;margin:0 auto 12px;display:block;opacity:.2}
+.empty-state p{font-size:13px}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px}
+.stat-chip-val{font-size:26px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;color:var(--accent);line-height:1}
+.stat-chip-lbl{font-size:11px;color:var(--ink3);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+/* Notification */
+#notif{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.notif-item{background:var(--surface2);color:var(--ink);border:1px solid var(--border-bright);padding:12px 18px;border-radius:var(--rl);font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slideUp .25s ease;display:flex;align-items:center;gap:8px}
+.notif-item.success{background:rgba(0,212,170,.12);border-color:rgba(0,212,170,.3);color:var(--success)}
+.notif-item.danger{background:rgba(255,77,109,.12);border-color:rgba(255,77,109,.3);color:var(--danger)}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Instructions */
+.instructions{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);padding:28px;margin-top:24px}
+.inst-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+@media(max-width:600px){.inst-grid{grid-template-columns:1fr}}
+.inst-step{background:var(--bg3);border-radius:var(--rl);padding:16px}
+.inst-num{width:28px;height:28px;background:var(--accent-s);border:1px solid rgba(0,212,170,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--accent);margin-bottom:10px}
+.inst-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.inst-desc{font-size:12px;color:var(--ink3);line-height:1.6}
+
+/* footer */
+footer{text-align:center;padding:20px;font-size:12px;color:var(--ink3);border-top:1px solid var(--border);position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 20 20"><path d="M2 4h16v2H2V4zm0 5h12v2H2V9zm0 5h14v2H2v-2z"/></svg></div>
+    <div>
+      <div class="logo-name">FinanceOS</div>
+      <div class="logo-sub">License Key Manager</div>
+    </div>
+  </div>
+  <div class="header-badge">🔑 ADMIN TOOL — PRIVATE</div>
+</div>
+
+<div id="notif"></div>
+
+<main>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-chip">
+      <div class="stat-chip-val" id="stat-total">0</div>
+      <div class="stat-chip-lbl">Keys Generated</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-chip-val" id="stat-rest" style="color:var(--accent)">0</div>
+      <div class="stat-chip-lbl">Restaurants</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-chip-val" id="stat-other" style="color:var(--accent2)">0</div>
+      <div class="stat-chip-lbl">Other Types</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Generator -->
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Generate New Key
+        </div>
+        <div class="form-group">
+          <label>Business Name</label>
+          <input id="g-biz" placeholder="e.g. Εστιατόριο Παπαδόπουλος" />
+        </div>
+        <div class="form-group">
+          <label>Contact / Owner</label>
+          <input id="g-contact" placeholder="e.g. Γιώργος Παπαδόπουλος" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="g-type">
+            <option value="REST">REST — Εστιατόριο / Restaurant</option>
+            <option value="CAF">CAF — Καφετέρια / Cafe · Bar</option>
+            <option value="HOT">HOT — Ξενοδοχείο / Hotel · Catering</option>
+            <option value="FOS">FOS — Γενικό / General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input id="g-notes" placeholder="e.g. Αθήνα, Κολωνάκι" />
+        </div>
+        <button class="btn btn-primary btn-full" onclick="generateKey()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Generate License Key
+        </button>
+
+        <div class="key-result" id="key-result">
+          <div class="key-label">License Key</div>
+          <div class="key-text" id="key-display"></div>
+          <div class="key-actions">
+            <button class="btn btn-primary btn-sm" onclick="copyCurrentKey()">Copy Key</button>
+            <button class="btn btn-secondary btn-sm" onclick="saveKey()">Save to List</button>
+          </div>
+          <div class="copy-confirm" id="copy-confirm">✓ Copied to clipboard!</div>
+        </div>
+      </div>
+
+      <!-- Verify -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Verify a Key
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>Paste Key to Verify</label>
+          <input id="v-key" class="mono-input" placeholder="REST-XXXX-XXXX-XXXX" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')verifyKey()"/>
+        </div>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="verifyKey()">Verify Key</button>
+        <div class="verify-result" id="v-result"></div>
+      </div>
+    </div>
+
+    <!-- Keys List -->
+    <div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+          <div class="card-title" style="margin-bottom:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Saved Keys
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="sb-status" style="font-size:11px;color:var(--ink3)">Syncing…</span>
+            <button class="btn btn-secondary btn-sm" onclick="refreshSbKeys()">↻ Sync</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportCSV()">↓ CSV</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+          <table class="keys-table" id="keys-table">
+            <thead>
+              <tr>
+                <th>Business / Status</th>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="keys-tbody">
+              <tr><td colspan="5">
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                  <p>Loading from Supabase…</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      How to Use
+    </div>
+    <div class="inst-grid">
+      <div class="inst-step">
+        <div class="inst-num">1</div>
+        <div class="inst-title">Generate</div>
+        <div class="inst-desc">Enter the business name, select the type and click Generate. Each key is unique and cryptographically tied to your secret.</div>
+      </div>
+      <div class="inst-step">
+        <div class="inst-num">2</div>
+        <div class="inst-title">Save & Send</div>
+        <div class="inst-desc">Click "Save to List" to keep a record, then copy the key and send it to your client via email or WhatsApp.</div>
+      </div>
+      <div class="inst-step">
+        <div class="inst-num">3</div>
+        <div class="inst-title">Client Activates</div>
+        <div class="inst-desc">The client opens FinanceOS, enters the key once on the license screen and it activates permanently on their device.</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px 16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:var(--r);font-size:12.5px;color:var(--warning)">
+      ⚠ Keep this file private — it contains your master key algorithm. The CSV export is your backup record of all issued licenses.
+    </div>
+    <div style="margin-top:12px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border-bright);border-radius:var(--r);font-size:12.5px;color:var(--ink2)">
+      <strong style="color:var(--ink)">License Transfer:</strong> If a client changes computer, they will see a "Device Not Authorized" screen showing their new <em>Device ID</em>. Generate a new key for them and they can re-activate. Old key remains blocked on old device (new localStorage = new blank state anyway).
+    </div>
+  </div>
+</main>
+
+<footer>FinanceOS Admin Tool — Private use only. Do not share this file.</footer>
+
+<script>
+// ── MASTER SECRET — change this to make your keys unique ──
+// If you change this, all previously generated keys become invalid!
+const MASTER_SECRET = 0xF05A1234; // <-- your secret number
+const VALID_TYPES = ['REST','CAF','HOT','FOS'];
+const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+// ── KEY ALGORITHM ──
+function lcg(seed){return((seed*1664525+1013904223)>>>0);}
+
+function makeSegment(seed){
+  let r=seed,out='';
+  for(let i=0;i<4;i++){r=lcg(r);out+=CHARS[r%CHARS.length];}
+  return{seg:out,next:r};
+}
+
+function nameHash(name){
+  let h=MASTER_SECRET;
+  const s=(name||'').toUpperCase().trim();
+  for(let i=0;i<s.length;i++){h=((h<<5)-h+s.charCodeAt(i))>>>0;}
+  return h;
+}
+
+function generateLicenseKey(type,bizName){
+  const ts=Date.now();
+  const nh=nameHash(bizName);
+  // Mix timestamp, name hash and secret
+  const seed1=(ts^nh^MASTER_SECRET)>>>0;
+  const seed2=(ts>>16)^nh;
+  const seed3=nh^(MASTER_SECRET>>8);
+  const {seg:g1}=makeSegment(seed1);
+  const {seg:g2}=makeSegment(lcg(seed2));
+  const {seg:g3}=makeSegment(lcg(seed3));
+  // Embed a checksum character in g3[3]
+  const allChars=g1+g2+g3.slice(0,3);
+  const checksum=allChars.split('').reduce((s,c)=>s+c.charCodeAt(0),0);
+  const chk=CHARS[(checksum+MASTER_SECRET)%CHARS.length];
+  const finalG3=g3.slice(0,3)+chk;
+  return `${type}-${g1}-${g2}-${finalG3}`;
+}
+
+function isValidKey(key){
+  if(!key)return{ok:false,reason:'Empty key'};
+  const k=key.toUpperCase().trim();
+  const parts=k.split('-');
+  if(parts.length!==4)return{ok:false,reason:'Wrong format — expected TYPE-XXXX-XXXX-XXXX'};
+  const[type,g1,g2,g3]=parts;
+  if(!VALID_TYPES.includes(type))return{ok:false,reason:`Invalid type "${type}" — must be REST, CAF, HOT or FOS`};
+  if(![g1,g2,g3].every(g=>g.length===4&&/^[A-Z0-9]+$/.test(g)))return{ok:false,reason:'Groups must be exactly 4 alphanumeric characters'};
+  // Verify checksum: last char of g3 must match
+  const allChars=g1+g2+g3.slice(0,3);
+  const checksum=allChars.split('').reduce((s,c)=>s+c.charCodeAt(0),0);
+  const expectedChk=CHARS[(checksum+MASTER_SECRET)%CHARS.length];
+  if(g3[3]!==expectedChk)return{ok:false,reason:'Checksum mismatch — key has been tampered with'};
+  return{ok:true,reason:'Valid FinanceOS license key'};
+}
+
+// ── SUPABASE CONFIG ──
+const SB_URL='https://frydjlifgcyywfliskkb.supabase.co';
+const SB_KEY='sb_publishable_FA6IuESx-TioUrKzQC3jpA_V0XjVPcp';
+
+async function sbFetch(path,opts={}){
+  try{
+    const res=await fetch(SB_URL+path,{
+      ...opts,
+      headers:{
+        'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
+        'Content-Type':'application/json','Prefer':'return=representation',
+        ...(opts.headers||{})
+      }
+    });
+    const data=await res.json().catch(()=>({}));
+    return{ok:res.ok,status:res.status,data};
+  }catch(e){return{ok:false,status:0,data:{},error:e};}
+}
+
+async function pushKeyToSupabase(entry){
+  const{ok,data}=await sbFetch('/rest/v1/licenses',{
+    method:'POST',
+    body:JSON.stringify({
+      license_key:entry.key,
+      business_name:entry.biz,
+      notes:(entry.contact?'Contact: '+entry.contact+' | ':'')+(entry.notes||''),
+      is_active:true
+    })
+  });
+  return ok;
+}
+
+async function revokeKeyInSupabase(key){
+  const{ok}=await sbFetch(
+    `/rest/v1/licenses?license_key=eq.${encodeURIComponent(key)}`,
+    {method:'PATCH',body:JSON.stringify({is_active:false})}
+  );
+  return ok;
+}
+
+async function transferKeyInSupabase(key){
+  const{ok}=await sbFetch(
+    `/rest/v1/licenses?license_key=eq.${encodeURIComponent(key)}`,
+    {method:'PATCH',body:JSON.stringify({machine_id:null,activated_at:null})}
+  );
+  return ok;
+}
+
+async function loadKeysFromSupabase(){
+  const{ok,data}=await sbFetch('/rest/v1/licenses?select=*&order=created_at.desc&limit=200');
+  if(!ok||!Array.isArray(data))return null;
+  return data;
+}
+
+// ── STATE ──
+let keys=[];
+let currentKey='';
+let currentType='';
+let sbKeys=[]; // live data from supabase
+
+function loadKeys(){
+  try{const s=localStorage.getItem('fos_admin_keys');if(s)keys=JSON.parse(s);}catch(e){}
+}
+function saveKeys(){localStorage.setItem('fos_admin_keys',JSON.stringify(keys));}
+
+// ── GENERATE ──
+function generateKey(){
+  const biz=document.getElementById('g-biz').value.trim();
+  const contact=document.getElementById('g-contact').value.trim();
+  const type=document.getElementById('g-type').value;
+  const notes=document.getElementById('g-notes').value.trim();
+  if(!biz){notify('Enter business name','danger');document.getElementById('g-biz').focus();return;}
+  currentKey=generateLicenseKey(type,biz);
+  currentType=type;
+  document.getElementById('key-display').textContent=currentKey;
+  document.getElementById('key-result').style.display='block';
+  document.getElementById('copy-confirm').style.display='none';
+  // Store pending entry
+  window._pendingEntry={key:currentKey,biz,contact,type,notes,date:new Date().toLocaleDateString('el-GR')};
+  notify('Key generated! Save it to your list.');
+}
+
+function copyCurrentKey(){
+  if(!currentKey)return;
+  copyToClipboard(currentKey,document.getElementById('copy-confirm'));
+}
+
+function copyToClipboard(text,confirmEl){
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>{if(confirmEl){confirmEl.style.display='block';setTimeout(()=>confirmEl.style.display='none',2000);}notify('Copied!');});
+  } else {
+    // Fallback for file://
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');notify('Copied!');}catch(e){notify('Press Ctrl+C to copy','danger');}
+    document.body.removeChild(ta);
+    if(confirmEl){confirmEl.style.display='block';setTimeout(()=>confirmEl.style.display='none',2000);}
+  }
+}
+
+async function saveKey(){
+  if(!window._pendingEntry){notify('Generate a key first','danger');return;}
+  if(keys.find(k=>k.key===window._pendingEntry.key)){notify('Key already saved');return;}
+  const entry={...window._pendingEntry,savedAt:new Date().toISOString()};
+
+  // Push to Supabase first
+  notify('Saving to server…');
+  const ok=await pushKeyToSupabase(entry);
+  if(ok){
+    notify('Key saved & registered in Supabase ✓','success');
+  } else {
+    notify('Saved locally — Supabase sync failed (check internet)','danger');
+  }
+
+  // Always save locally too
+  keys.push(entry);
+  saveKeys();
+  renderTable();
+  updateStats();
+  // Refresh Supabase list
+  refreshSbKeys();
+}
+
+// ── VERIFY ──
+function verifyKey(){
+  const k=document.getElementById('v-key').value.trim();
+  const el=document.getElementById('v-result');
+  if(!k){notify('Paste a key first','danger');return;}
+  const {ok,reason}=isValidKey(k);
+  el.style.display='block';
+  el.className='verify-result '+(ok?'ok':'err');
+  el.innerHTML=ok
+    ?`<span>✓ VALID KEY</span><span style="font-size:12px;font-weight:400;display:block;margin-top:3px;opacity:.8">${reason}</span>`
+    :`<span>✗ INVALID KEY</span><span style="font-size:12px;font-weight:400;display:block;margin-top:3px;opacity:.8">${reason}</span>`;
+  if(!ok)document.getElementById('v-key').classList.add('error');
+  else document.getElementById('v-key').classList.remove('error');
+  // Check if it's in our list
+  if(ok){
+    const found=keys.find(k2=>k2.key===k);
+    if(found){
+      el.innerHTML+=`<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,212,170,.2);font-size:12px;font-weight:400">📁 Found in records: <strong>${found.biz}</strong> (${found.date})</div>`;
+    } else {
+      el.innerHTML+=`<div style="margin-top:8px;font-size:12px;font-weight:400;opacity:.7">Not in your saved records — may be valid but unregistered.</div>`;
+    }
+  }
+}
+
+// ── TABLE ──
+function renderTable(liveData){
+  const tb=document.getElementById('keys-tbody');
+  // Use live Supabase data if available, otherwise local
+  const rows=liveData||sbKeys.length?sbKeys:keys;
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="6"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><p>No keys yet. Generate and save your first key.</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML=rows.map((k,i)=>{
+    const isSb=k.license_key; // Supabase record has license_key field
+    const key=isSb?k.license_key:k.key;
+    const biz=isSb?k.business_name:k.biz;
+    const type=key.split('-')[0];
+    const date=isSb?(k.created_at?k.created_at.slice(0,10):''):k.date;
+    const active=isSb?k.is_active:true;
+    const machineId=isSb?k.machine_id:null;
+    const activated=isSb&&k.activated_at;
+    return`<tr style="${!active?'opacity:.45':''}" id="row-${i}">
+      <td>
+        <div class="biz-name-cell">${biz||'—'}</div>
+        <div style="font-size:11.5px;color:var(--ink3);margin-top:2px">
+          ${machineId?`<span style="color:var(--success)">✓ Active</span> · Device: <span style="font-family:var(--mono);font-size:10px">${machineId.slice(0,8)}…</span>`
+            :activated?'<span style="color:var(--warning)">Activating…</span>'
+            :'<span style="color:var(--ink3)">Not yet activated</span>'}
+        </div>
+      </td>
+      <td><div class="key-mono">${key}</div></td>
+      <td><span class="type-badge type-${type}">${type}</span></td>
+      <td class="date-cell">${date}</td>
+      <td>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="copyText('${key}',this)">Copy</button>
+          ${machineId&&active?`<button class="btn btn-secondary btn-sm" style="color:var(--accent2)" onclick="transferKey('${key}',${i})">Transfer</button>`:''}
+          ${active&&isSb?`<button class="btn btn-danger btn-sm" onclick="revokeKey('${key}',${i})">Revoke</button>`:''}
+          ${!active?`<span style="font-size:11px;color:var(--danger);font-weight:700;padding:5px">REVOKED</span>`:''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function revokeKey(key,idx){
+  if(!confirm(`Revoke key ${key}?\n\nThe client will be locked out immediately. This cannot be undone.`))return;
+  notify('Revoking…');
+  const ok=await revokeKeyInSupabase(key);
+  if(ok){notify('Key revoked — client is now blocked','danger');refreshSbKeys();}
+  else notify('Revoke failed — check internet connection','danger');
+}
+
+async function transferKey(key,idx){
+  if(!confirm(`Transfer key ${key} to a new device?\n\nThe client will need to re-activate on their new machine. Their data stays intact.`))return;
+  notify('Transferring…');
+  const ok=await transferKeyInSupabase(key);
+  if(ok){notify('Transfer complete — client can now activate on new device ✓','success');refreshSbKeys();}
+  else notify('Transfer failed — check internet connection','danger');
+}
+
+async function refreshSbKeys(){
+  document.getElementById('sb-status').textContent='Syncing…';
+  const data=await loadKeysFromSupabase();
+  if(data){
+    sbKeys=data;
+    renderTable();
+    updateStats();
+    document.getElementById('sb-status').textContent=`${data.length} keys — synced ${new Date().toLocaleTimeString()}`;
+  } else {
+    document.getElementById('sb-status').textContent='Offline — showing local data';
+  }
+}
+
+function deleteKey(idx){
+  if(!confirm('Delete this key from records?'))return;
+  keys.splice(idx,1);saveKeys();renderTable();updateStats();notify('Deleted','danger');
+}
+
+function clearAll(){
+  if(!keys.length)return;
+  if(!confirm(`Delete all ${keys.length} keys from records? This cannot be undone.`))return;
+  keys=[];saveKeys();renderTable();updateStats();notify('All records cleared','danger');
+}
+
+// ── STATS ──
+function updateStats(){
+  const rows=sbKeys.length?sbKeys:keys;
+  const total=rows.length;
+  const rest=rows.filter(k=>(k.license_key||k.key||'').startsWith('REST')).length;
+  const other=total-rest;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-rest').textContent=rest;
+  document.getElementById('stat-other').textContent=other;
+}
+
+// ── EXPORT CSV ──
+function exportCSV(){
+  const rows=sbKeys.length?sbKeys:keys;
+  if(!rows.length){notify('No keys to export','danger');return;}
+  const headers='Business,Key,Type,Machine ID,Activated,Active,Notes,Date';
+  const csvRows=rows.map(k=>{
+    const isSb=k.license_key;
+    const key=isSb?k.license_key:k.key;
+    const biz=isSb?k.business_name:k.biz;
+    const type=key.split('-')[0];
+    const mid=isSb?k.machine_id||'':'';
+    const act=isSb?k.activated_at||'':'';
+    const active=isSb?(k.is_active?'YES':'REVOKED'):'YES';
+    const notes=isSb?k.notes||'':k.notes||'';
+    const date=isSb?k.created_at||'':k.date||'';
+    return`"${biz}","${key}","${type}","${mid}","${act}","${active}","${notes}","${date}"`;
+  });
+  const csv=[headers,...csvRows].join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`FinanceOS_Licenses_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},500);
+  notify(`Exported ${rows.length} keys`);
+}
+
+// ── NOTIFY ──
+function notify(msg,type='success'){
+  const d=document.createElement('div');d.className='notif-item '+(type||'');
+  d.innerHTML=`<span style="font-size:15px">${type==='success'?'✓':type==='danger'?'✕':'ℹ'}</span> ${msg}`;
+  document.getElementById('notif').appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),300);},3000);
+}
+
+// ── INIT ──
+loadKeys();
+renderTable();
+updateStats();
+// Auto-sync from Supabase on load
+refreshSbKeys();
+</script>
+</body>
+</html>
